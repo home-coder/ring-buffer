@@ -3,9 +3,14 @@
 #include <strings.h>
 #include <string.h>
 #include <kfifo.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <sys/mman.h>
+#include <unistd.h>
 
 #define FIFO_LENGTH 4096
-#define ORG_TEST
 
 struct ll_param {
 	struct kfifo *fifo;
@@ -25,7 +30,7 @@ void thread_reader(void *param)
 
 	for (;;) {
 		bzero(buffer, FIFO_LENGTH);
-		read_len = kfifo_get(p->fifo, buffer, 25);
+		read_len = kfifo_get(p->fifo, buffer, 32);
 		if (read_len != 0) {
 			printf("Read len:%d, buffer is  :< %s >n\n", read_len,
 			       buffer);
@@ -42,7 +47,6 @@ void thread_reader(void *param)
 #ifdef ORG_TEST
 void thread_writer(void *param)
 {
-	unsigned int write_len = 0;
 	unsigned int counter = 0;
 	unsigned char buffer[32];
 	struct ll_param *p = (struct ll_param *)param;
@@ -50,14 +54,35 @@ void thread_writer(void *param)
 	for (counter = 0; counter < 100; counter++) {
 		bzero(buffer, 32);
 		sprintf((char *)buffer, "This is %d message.n", counter);
-		write_len = kfifo_put(p->fifo, buffer, 25);	//strlen((char *)buffer)  
+		kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)  
 		usleep(100);
 	}
 }
 #else
 void thread_writer(void *param)
 {
+#define PAGE_SIZE (4*1024)
+#define PAGE_OFFSET               0xc0000000
+#define KERNEL_VIRT_ADDR 0x2249c000	//此处地址即为内核模块打印的地址p，动态的不固定，需要自行修改
+	unsigned char *buffer;
+	int fd;
+	unsigned long phy_addr;
+	struct ll_param *p = (struct ll_param *)param;
 
+	fd = open("/dev/mem", O_RDWR);
+	if (fd == -1)
+		perror("open");
+
+	phy_addr = KERNEL_VIRT_ADDR;
+	buffer = mmap(0, PAGE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, phy_addr);
+	if (buffer == MAP_FAILED)
+		perror("mmap");
+	while (1) {
+		kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)  
+	}
+
+	munmap(buffer, PAGE_SIZE);
+	close(fd);
 }
 #endif
 

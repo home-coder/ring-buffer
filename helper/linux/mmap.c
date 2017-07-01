@@ -6,7 +6,7 @@
 
 #define PAGE_SIZE (4*1024)
 #define PAGE_OFFSET               0xc0000000
-#define KERNEL_VIRT_ADDR 0x22cb7000	//此处地址即为内核模块打印的地址p，动态的不固定，需要自行修改
+#define KERNEL_VIRT_ADDR 0x200b5000	//此处地址即为内核模块打印的地址p，动态的不固定，需要自行修改
 
 int main()
 {
