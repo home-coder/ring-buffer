@@ -10,3 +10,8 @@ http://www.cnblogs.com/Anker/p/3481373.html
 目前已通过helper目录下测试代码，测试mmap的使用，并使用内存设备直接代替具体的物理设备如dongle等。
 
 下面就可以通过把helper的代码集成到test.c中就可以完全实现kfifo与mmap的综合应用了
+
+
+未解决问题：
+1.为什么要用环形缓冲区kfifo
+2.内核数据写入，与mmap后的用户空间取走这个buffer的数据如何同步
