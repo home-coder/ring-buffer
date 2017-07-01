@@ -4,6 +4,7 @@ CC =  gcc
 
 test:test.o  kfifo.o  
 	${CC} ${CFLAGS} test.o  kfifo.o -o $@ ${INCLUDE} -pthread  
+	rm -rf *.o
 
 test.o:  
 	$(CC) -c test.c ${INCLUDE} -pthread  
