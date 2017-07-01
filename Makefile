@@ -13,7 +13,7 @@ endif
 INCLUDE = -I ./include 
 
 test:test.o  kfifo.o  
-	${CC} test.o  kfifo.o -o $@ ${INCLUDE} -lpthread  
+	${CC} test.o  kfifo.o -o $@ ${INCLUDE} -lpthread $(CFLAGS)
 	rm -rf *.o
 test.o:  
 	$(CC) -c test.c ${INCLUDE} -pthread $(CFLAGS)
