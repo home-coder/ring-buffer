@@ -1,9 +1,12 @@
-#define FIFO_LENGTH 4096
 #include <stdio.h>
 #include <pthread.h>
 #include <strings.h>
 #include <string.h>
 #include <kfifo.h>
+
+#define FIFO_LENGTH 4096
+#define ORG_TEST
+
 struct ll_param {
 	struct kfifo *fifo;
 	int msg_len;
@@ -36,6 +39,7 @@ void thread_reader(void *param)
 	}
 }
 
+#ifdef ORG_TEST
 void thread_writer(void *param)
 {
 	unsigned int write_len = 0;
@@ -50,6 +54,12 @@ void thread_writer(void *param)
 		usleep(100);
 	}
 }
+#else
+void thread_writer(void *param)
+{
+
+}
+#endif
 
 int main(void)
 {
@@ -60,8 +70,11 @@ int main(void)
 	fifo.fifo = kfifo_alloc(FIFO_LENGTH);
 
 	pthread_create(&pidw, NULL, (void *)thread_writer, &fifo);
+#ifdef ORG_TEST
 	pthread_create(&pidr, NULL, (void *)thread_reader, &fifo);
-
+#else
+	pthread_create(&pidr, NULL, (void *)thread_reader, &fifo);
+#endif
 	pthread_join(pidr, NULL);
 	pthread_join(pidw, NULL);
 
