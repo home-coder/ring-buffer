@@ -15,3 +15,4 @@ http://www.cnblogs.com/Anker/p/3481373.html
 未解决问题：
 1.为什么要用环形缓冲区kfifo
 2.内核数据写入，与mmap后的用户空间取走这个buffer的数据如何同步
+3.内核模块的地址如何在用户空间操作
