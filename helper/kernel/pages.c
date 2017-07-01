@@ -4,24 +4,23 @@
 #include <linux/mm.h>
 
 static unsigned long p = 0;
+static unsigned long pp = 0;
 
 static int __init shao_init(void)
 {
-
 	//分配共享内存（一个页面）
 
 	p = __get_free_pages(GFP_KERNEL, 0);
 
 	SetPageReserved(virt_to_page(p));
-
-	printk("<1> p = 0x%08x\n", (unsigned int)p);
+	// 使用virt_to_phys计算物理地址，供用户态程序使用
+	pp = (unsigned long)virt_to_phys((void *)p);
+	printk("<1> pp = 0x%lx\n", pp);
 
 	//在共享内存中写上一个字符串
-
-	strcpy((char *)p, "Hello world!\n");
-
+	
+	strcpy((char *)p, "hello\n");
 	return 0;
-
 }
 
 static void __exit shao_exit(void)
