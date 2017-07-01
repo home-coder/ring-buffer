@@ -12,7 +12,7 @@ char buf[32];
 static int put_pages(void *p)
 {
 	while (1) {
-	msleep(20);
+	msleep(1000);
 	sprintf(buf, "hello %d\n", count++ % 1000);
 	strcpy((char *)p, buf);
 	}
