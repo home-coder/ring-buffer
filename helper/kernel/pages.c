@@ -2,9 +2,22 @@
 #include <linux/module.h>
 #include <linux/kernel.h>
 #include <linux/mm.h>
+#include <linux/delay.h>
 
 static unsigned long p = 0;
 static unsigned long pp = 0;
+int count = 0;
+char buf[32];
+
+static int put_pages(void *p)
+{
+	while (1) {
+	msleep(20);
+	sprintf(buf, "hello %d\n", count++ % 1000);
+	strcpy((char *)p, buf);
+	}
+	return 0;
+}
 
 static int __init shao_init(void)
 {
@@ -18,8 +31,7 @@ static int __init shao_init(void)
 	printk("<1> pp = 0x%lx\n", pp);
 
 	//在共享内存中写上一个字符串
-	
-	strcpy((char *)p, "hello\n");
+	kernel_thread(put_pages, (void *)p, 0);
 	return 0;
 }
 
