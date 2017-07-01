@@ -7,19 +7,19 @@
 #define min(x,y) ((x) < (y) ? (x) : (y) )
 
 #define max(x,y) ((x) > (y) ? (x) : (y) )
-										      /* 
-										         static inline int fls(int x) 
-										         { 
-										         int r; 
+/* 
+   static inline int fls(int x) 
+   { 
+   int r; 
 
-										         __asm__("bsrl %1,%0nt" 
-										         "jnz 1fnt" 
-										         "movl $-1,%0n" 
-										         "1:" : "=r" (r) : "rm" (x)); 
-										         return r+1; 
-										         } 
+   __asm__("bsrl %1,%0nt" 
+   "jnz 1fnt" 
+   "movl $-1,%0n" 
+   "1:" : "=r" (r) : "rm" (x)); 
+   return r+1; 
+   } 
 
-										       */
+*/
 static inline int fls(int x)
 {
 	int r = 32;
