@@ -33,6 +33,7 @@ void thread_reader(void *param)
 	printf("nnn = %d\n", (int)roundup_pow_of_two(5));
 
 	for (;;) {
+		pthread_mutex_lock(&qlock);
 		klen = kfifo_len(p->fifo);
 		if (klen <= 0) {
 			pthread_cond_wait(&q_not_empty, &qlock);
@@ -49,6 +50,8 @@ void thread_reader(void *param)
 				break;
 			}
 		}
+
+		pthread_mutex_unlock(&qlock);
 		pthread_cond_signal(&q_not_full);
 		//sleep(1);
 		//usleep(100000);
@@ -64,6 +67,8 @@ void thread_writer(void *param)
 	unsigned int klen = 0;
 
 	for (counter = 0; counter < 2000; counter++) {
+		pthread_mutex_lock(&qlock);
+
 		klen = kfifo_len(p->fifo);
 		if (klen >= FIFO_LENGTH) {
 			sleep(5);
@@ -72,8 +77,9 @@ void thread_writer(void *param)
 
 		bzero(buffer, 32);
 		sprintf((char *)buffer, "This is %d message.n", counter);
-		kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)  
+		kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)
 
+		pthread_mutex_unlock(&qlock);
 		pthread_cond_signal(&q_not_empty);
 //		usleep(100);
 	}
