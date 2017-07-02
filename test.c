@@ -51,7 +51,7 @@ void thread_reader(void *param)
 		}
 		pthread_cond_signal(&q_not_full);
 		//sleep(1);
-		usleep(100000);
+		//usleep(100000);
 	}
 }
 
