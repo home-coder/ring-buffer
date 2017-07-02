@@ -38,9 +38,10 @@ void thread_reader(void *param)
 			counter++;
 		}
 		if (counter > 20) {
-			break;
+			//break;
 		}
-		usleep(50000);
+		sleep(1);
+		//usleep(50000);
 	}
 }
 
@@ -51,11 +52,11 @@ void thread_writer(void *param)
 	unsigned char buffer[32];
 	struct ll_param *p = (struct ll_param *)param;
 
-	for (counter = 0; counter < 100; counter++) {
+	for (counter = 0; counter < 2000; counter++) {
 		bzero(buffer, 32);
 		sprintf((char *)buffer, "This is %d message.n", counter);
 		kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)  
-		usleep(100);
+//		usleep(100);
 	}
 }
 #else
@@ -63,7 +64,7 @@ void thread_writer(void *param)
 {
 #define PAGE_SIZE (4*1024)
 #define PAGE_OFFSET               0xc0000000 //32位的偏移3G, 但是我在内核求得用户空间地址了，这个变量不需要了
-#define KERNEL_VIRT_ADDR 0x2249c000	//此处地址即为内核模块打印的地址p，动态的不固定，需要自行修改
+#define KERNEL_VIRT_ADDR 0x22049000	//此处地址即为内核模块打印的地址p，动态的不固定，需要自行修改
 	unsigned char *buffer;
 	int fd;
 	unsigned long phy_addr;
@@ -79,6 +80,8 @@ void thread_writer(void *param)
 		perror("mmap");
 	while (1) {
 		kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)  
+		bzero(buffer, 32);
+		usleep(10);
 	}
 
 	munmap(buffer, PAGE_SIZE);

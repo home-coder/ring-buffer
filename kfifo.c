@@ -57,7 +57,8 @@ unsigned int __kfifo_put(struct kfifo *fifo, unsigned char *buffer,
 	memcpy(fifo->buffer, buffer + l, len - l);
 
 	fifo->in += len;
-
+	static int i = 0;
+	printf("put put put %d\n", i++);
 	return len;
 }
 
