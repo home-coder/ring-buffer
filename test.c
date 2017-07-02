@@ -11,6 +11,9 @@
 #include <unistd.h>
 
 #define FIFO_LENGTH 4096
+pthread_cond_t q_not_full = PTHREAD_COND_INITIALIZER; 
+pthread_cond_t q_not_empty = PTHREAD_COND_INITIALIZER;
+pthread_mutex_t qlock = PTHREAD_MUTEX_INITIALIZER;
 
 struct ll_param {
 	struct kfifo *fifo;
@@ -25,10 +28,16 @@ void thread_reader(void *param)
 	unsigned int counter = 0;
 	unsigned char buffer[FIFO_LENGTH];
 	struct ll_param *p = (struct ll_param *)param;
+	unsigned int klen = 0;
 
 	printf("nnn = %d\n", (int)roundup_pow_of_two(5));
 
 	for (;;) {
+		klen = kfifo_len(p->fifo);
+		if (klen <= 0) {
+			pthread_cond_wait(&q_not_empty, &qlock);
+		}
+
 		bzero(buffer, FIFO_LENGTH);
 		read_len = kfifo_get(p->fifo, buffer, 32);
 		if (read_len != 0) {
@@ -36,12 +45,13 @@ void thread_reader(void *param)
 			       buffer);
 		} else {
 			counter++;
+			if (counter > 2) {
+				break;
+			}
 		}
-		if (counter > 20) {
-			//break;
-		}
-		sleep(1);
-		//usleep(50000);
+		pthread_cond_signal(&q_not_full);
+		//sleep(1);
+		usleep(100000);
 	}
 }
 
@@ -51,11 +61,20 @@ void thread_writer(void *param)
 	unsigned int counter = 0;
 	unsigned char buffer[32];
 	struct ll_param *p = (struct ll_param *)param;
+	unsigned int klen = 0;
 
 	for (counter = 0; counter < 2000; counter++) {
+		klen = kfifo_len(p->fifo);
+		if (klen >= FIFO_LENGTH) {
+			sleep(5);
+			pthread_cond_wait(&q_not_full, &qlock);
+		}
+
 		bzero(buffer, 32);
 		sprintf((char *)buffer, "This is %d message.n", counter);
 		kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)  
+
+		pthread_cond_signal(&q_not_empty);
 //		usleep(100);
 	}
 }
