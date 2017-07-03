@@ -23,7 +23,7 @@ static int put_pages(void *param)
 			return 0;
 		}
 
-		printk("put mmap -->%d\n", count);
+		//printk("put mmap -->%d\n", count);
 		strcpy((char *)p, buf);
 	}
 

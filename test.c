@@ -91,7 +91,7 @@ void thread_writer(void *param)
 {
 #define PAGE_SIZE (4*1024)
 //#define PAGE_OFFSET               0xc0000000 //32位的偏移3G, 但是我在内核求得用户空间地址了，这个变量不需要了
-#define KERNEL_VIRT_ADDR 0x22049000	//此处地址即为内核模块打印的地址p，动态的不固定，需要自行修改
+#define KERNEL_VIRT_ADDR 0x8346000	//此处地址即为内核模块打印的地址p，动态的不固定，需要自行修改
 	unsigned char *buffer;
 	int fd;
 	unsigned long phy_addr;
