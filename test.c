@@ -115,11 +115,18 @@ void thread_writer(void *param)
 			}
 			kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)  
 			bzero(buffer, 32);
+		} else {
+			//等待内核填充mmap内存缓冲, kfifo机制的作用就是让快者线程腾出CPU一段时间，假设500us, 情景适用于生产者速度大于消费者
+			//如果底层吐数据为低速总线，而上层取数据为从内存取高速的，这个延时就是错误的方式, 需要给消费者一个延时让出CPU,并空闲等待数据到来
+			//但是如果从内存去玩数据，还需要计算等等很多操作，那么消费者速度就会低于生产者，可以使用下面的sleep..注delay忙等不可以.
+			usleep(500);
+			pthread_mutex_unlock(&qlock);
+			continue;
 		}
 
 		pthread_mutex_unlock(&qlock);
 		pthread_cond_signal(&q_not_empty);
-		usleep(10);
+		usleep(500);//给读者一段时间处理数据
 	}
 
 	munmap(buffer, PAGE_SIZE);
@@ -145,6 +152,6 @@ int main(void)
 	pthread_join(pidw, NULL);
 
 	kfifo_free(fifo.fifo);
-	printf("nGoodbye!n\n");
+	printf("====== <kfifo & mmap test over> =====\n");
 	return 0;
 }
