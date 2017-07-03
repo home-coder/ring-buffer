@@ -47,6 +47,7 @@ void thread_reader(void *param)
 		} else {
 			counter++;
 			if (counter > 2) {
+				printf("这里会走到吗\n");
 				break;
 			}
 		}
