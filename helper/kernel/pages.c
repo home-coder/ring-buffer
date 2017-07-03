@@ -32,7 +32,7 @@ static int put_pages(void *param)
 
 static int creat_work(void)
 {
-	int err;
+	int err = -1;
 
 	mmap_task = kthread_run(put_pages, NULL, "mmap_task");
 	if (IS_ERR(mmap_task)) {

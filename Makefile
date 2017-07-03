@@ -1,8 +1,9 @@
 #ARCH=armh
-ARCH=armc
+#ARCH=armc
 #与硬件相关，需要联调
 #ARCH=x86org
 #ARCH=x86mmap
+ARCH=amlogic
 
 #$(info, $(ARCH))//内核 androidmk使用
 ifeq ($(ARCH), armh)
@@ -12,6 +13,11 @@ endif
 
 ifeq ($(ARCH), armc)
 	CC = /opt/toolchain/mstar/linaro-aarch64_linux-2014.09_843419-patched/bin/aarch64-linux-gnu-gcc 
+    CFLAGS = -O2  -Wall --static
+endif
+
+ifeq ($(ARCH), amlogic)
+    CC = /opt/toolchain/amlogic/gcc-linaro-aarch64-linux-gnu-4.9-2014.09_linux/bin/aarch64-linux-gnu-gcc
     CFLAGS = -O2  -Wall --static
 endif
 
