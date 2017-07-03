@@ -85,16 +85,18 @@ void thread_writer(void *param)
 //		usleep(100);
 	}
 }
+
 #else
 void thread_writer(void *param)
 {
 #define PAGE_SIZE (4*1024)
-#define PAGE_OFFSET               0xc0000000 //32位的偏移3G, 但是我在内核求得用户空间地址了，这个变量不需要了
+//#define PAGE_OFFSET               0xc0000000 //32位的偏移3G, 但是我在内核求得用户空间地址了，这个变量不需要了
 #define KERNEL_VIRT_ADDR 0x22049000	//此处地址即为内核模块打印的地址p，动态的不固定，需要自行修改
 	unsigned char *buffer;
 	int fd;
 	unsigned long phy_addr;
 	struct ll_param *p = (struct ll_param *)param;
+	unsigned int klen = 0;
 
 	fd = open("/dev/mem", O_RDWR);
 	if (fd == -1)
@@ -105,8 +107,18 @@ void thread_writer(void *param)
 	if (buffer == MAP_FAILED)
 		perror("mmap");
 	while (1) {
-		kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)  
-		bzero(buffer, 32);
+		pthread_mutex_lock(&qlock);
+
+		if (buffer[0] != '\0') {
+			if (klen >= FIFO_LENGTH) {
+				pthread_cond_wait(&q_not_full, &qlock);
+			}
+			kfifo_put(p->fifo, buffer, 32);	//strlen((char *)buffer)  
+			bzero(buffer, 32);
+		}
+
+		pthread_mutex_unlock(&qlock);
+		pthread_cond_signal(&q_not_empty);
 		usleep(10);
 	}
 

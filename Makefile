@@ -1,11 +1,20 @@
 #ARCH=arm
 #与硬件相关，需要联调
-ARCH=x86
+#ARCH=x86org
+ARCH=x86mmap
+
 #$(info, $(ARCH))//内核 androidmk使用
 ifeq ($(ARCH), arm)
     CC = ~/basic/cross_compile/gcc-4.6.2-glibc-2.13-linaro-multilib-2011.12/fsl-linaro-toolchain/bin/arm-fsl-linux-gnueabi-gcc
     CFLAGS = -O2  -Wall --static
-else
+endif
+
+ifeq ($(ARCH), x86mmap)
+	CC = gcc
+	CFLAGS = -O2 -Wall --static
+endif
+
+ifeq ($(ARCH), x86org)
     CC = gcc
     CFLAGS = -DORG_TEST -O2  -Wall --static
 endif
